@@ -14,9 +14,6 @@ services:
       - api-net
       - store-net
       - minio
-    profiles:
-      - store
-      - all
     depends_on:
       - store-db
       - minio
@@ -32,9 +29,6 @@ services:
     restart: on-failure
     networks:
       - store-net
-    profiles:
-      - store
-      - all
 
   # ANALYSIS SERVICE
   analysis-service:
@@ -51,9 +45,6 @@ services:
       - api-net
       - analysis-net
       - minio
-    profiles:
-      - analysis
-      - all
     depends_on:
       - analysis-db
       - minio
@@ -69,9 +60,6 @@ services:
     restart: on-failure
     networks:
       - analysis-net
-    profiles:
-      - analysis
-      - all
 
   # API GATEWAY SERVICE
   api-service:
@@ -80,8 +68,6 @@ services:
     restart: on-failure
     networks:
       - api-net
-    profiles:
-      - all
     depends_on:
       - analysis-service
       - store-service

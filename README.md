@@ -56,6 +56,11 @@ docker compose run --rm store-service poetry run pytest -v
 docker compose run --rm analysis-service poetry run pytest -v
 ```
 
+## Запуск
+```bash
+docker compose up
+```
+
 ---
 
 # 📐 Архитектура
