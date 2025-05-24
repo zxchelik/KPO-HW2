@@ -1,0 +1,32 @@
+database:
+  host: analysis-db
+  port: 5432
+  user: "${POSTGRES_USER}"
+  password: "${POSTGRES_PASSWORD}"
+  name: analysis-db
+  database_system: postgresql
+  driver: asyncpg
+
+minio:
+  host: minio
+  port: 9000
+  secure: false
+  access_key: "${MINIO_ACCESS_KEY}"
+  secret_key: "${MINIO_SECRET_KEY}"
+  bucket_name: "${MINIO_BUCKET}"
+
+file_store_service:
+  host: store-service
+  port: 8000
+  secure: false
+  path: "/files"
+
+word_cloud:
+  host: "quickchart.io"
+  path: "/wordcloud"
+  pic_format: "png"
+  width: 1000
+  height: 1000
+  font_family: "sans-serif"
+  font_scale: 15
+  scale: "linear"

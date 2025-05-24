@@ -1,0 +1,119 @@
+services:
+  # STORE SERVICE
+  store-service:
+    build:
+      context: ./Store service
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+    restart: on-failure
+    networks:
+      - api-net
+      - store-net
+      - minio
+    profiles:
+      - store
+      - all
+    depends_on:
+      - store-db
+      - minio
+  store-db:
+    image: postgres:15-alpine
+    container_name: store-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: store-db
+    volumes:
+      - "01-simple-alchemy-postgres:/var/lib/postgresql/data"
+    restart: on-failure
+    networks:
+      - store-net
+    profiles:
+      - store
+      - all
+
+  # ANALYSIS SERVICE
+  analysis-service:
+    build:
+      context: ./Analisys service
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+    restart: on-failure
+    networks:
+      - api-net
+      - analysis-net
+      - minio
+    profiles:
+      - analysis
+      - all
+    depends_on:
+      - analysis-db
+      - minio
+  analysis-db:
+    image: postgres:15-alpine
+    container_name: analysis-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: analysis-db
+    volumes:
+      - "02-simple-alchemy-postgres:/var/lib/postgresql/data"
+    restart: on-failure
+    networks:
+      - analysis-net
+    profiles:
+      - analysis
+      - all
+
+  # API GATEWAY SERVICE
+  api-service:
+    build:
+      context: ./API Gateway
+    restart: on-failure
+    networks:
+      - api-net
+    profiles:
+      - all
+    depends_on:
+      - analysis-service
+      - store-service
+    ports:
+      - "80:8000"
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: "${MINIO_ACCESS_KEY}"
+      MINIO_ROOT_PASSWORD: "${MINIO_SECRET_KEY}"
+    volumes:
+      - minio_data:/data
+    command: server --console-address ":9001" /data
+    networks:
+      - minio
+
+volumes:
+  01-simple-alchemy-postgres:
+  02-simple-alchemy-postgres:
+  minio_data:
+
+networks:
+  minio:
+    driver: bridge
+    internal: true
+  store-net:
+    driver: bridge
+    internal: true
+  analysis-net:
+    driver: bridge
+    internal: true
+  api-net:
+    driver: bridge
